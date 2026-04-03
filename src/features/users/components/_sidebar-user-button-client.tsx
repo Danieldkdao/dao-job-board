@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { UserTable } from "@/db/schema";
 import { SignOutButton } from "@/services/clerk/components/auth-buttons";
 import { useClerk } from "@clerk/nextjs";
 import {
@@ -20,7 +21,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export const SidebarUserButtonClient = () => {
+type UserProps = {
+  user: typeof UserTable.$inferSelect;
+};
+
+export const SidebarUserButtonClient = (props: UserProps) => {
   const { isMobile, setOpenMobile } = useSidebar();
   const { openUserProfile } = useClerk();
 
@@ -31,7 +36,7 @@ export const SidebarUserButtonClient = () => {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <UserInfo />
+          <UserInfo {...props} />
           <ChevronsUpDownIcon className="ml-auto group-data-[state=collapsed]:hidden" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -42,7 +47,7 @@ export const SidebarUserButtonClient = () => {
         className="min-w-64 max-w-80"
       >
         <DropdownMenuLabel className="font-normal p-1">
-          <UserInfo />
+          <UserInfo {...props} />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -71,11 +76,9 @@ export const SidebarUserButtonClient = () => {
   );
 };
 
-const UserInfo = () => {
-  // todo: come back and fill with real info once db is hooked up
-  const name = "Daniel Dao";
-  const email = "danieldkdao@gmail.com";
-  const imageUrl = undefined;
+const UserInfo = ({ user }: UserProps) => {
+  const name = user?.name ?? "Unknown";
+  const email = user?.email ?? "Unknown";
   const nameInitials = name
     .split(" ")
     .slice(0, 2)
@@ -85,7 +88,7 @@ const UserInfo = () => {
   return (
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
-        <AvatarImage src={imageUrl} alt={name} />
+        <AvatarImage src={user?.imageUrl} alt={name} />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}
         </AvatarFallback>
