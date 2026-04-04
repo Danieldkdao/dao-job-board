@@ -1,5 +1,6 @@
 import { UserJSON, DeletedObjectJSON } from "@clerk/nextjs/server";
-import { EventType, eventType, Inngest, staticSchema } from "inngest";
+import { OrganizationJSON } from "@clerk/nextjs/types";
+import { eventType, Inngest, staticSchema } from "inngest";
 
 type ClerkWebhookData<T> = {
   data: T;
@@ -11,6 +12,9 @@ type Events = {
   "clerk/user.created": ClerkWebhookData<UserJSON>;
   "clerk/user.updated": ClerkWebhookData<UserJSON>;
   "clerk/user.deleted": ClerkWebhookData<DeletedObjectJSON>;
+  "clerk/organization.created": ClerkWebhookData<OrganizationJSON>;
+  "clerk/organization.updated": ClerkWebhookData<OrganizationJSON>;
+  "clerk/organization.deleted": ClerkWebhookData<DeletedObjectJSON>;
 };
 
 export const getWebhookSchema = <T extends keyof Events>(
