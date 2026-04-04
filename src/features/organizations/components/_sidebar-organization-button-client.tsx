@@ -10,24 +10,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { UserTable } from "@/db/schema";
+import { OrganizationTable, UserTable } from "@/db/schema";
 import { SignOutButton } from "@/services/clerk/components/auth-buttons";
 import { useClerk } from "@clerk/nextjs";
 import {
+  ArrowLeftRightIcon,
+  Building2Icon,
   ChevronsUpDownIcon,
+  CreditCardIcon,
   LogOutIcon,
-  SettingsIcon,
-  UserIcon,
+  UserRoundCogIcon,
 } from "lucide-react";
 import Link from "next/link";
 
 type UserProps = {
   user: typeof UserTable.$inferSelect;
+  organization: typeof OrganizationTable.$inferSelect;
 };
 
-export const SidebarUserButtonClient = (props: UserProps) => {
+export const SidebarOrganizationButtonClient = (props: UserProps) => {
   const { isMobile, setOpenMobile } = useSidebar();
-  const { openUserProfile } = useClerk();
+  const { openOrganizationProfile } = useClerk();
 
   return (
     <DropdownMenu>
@@ -36,7 +39,7 @@ export const SidebarUserButtonClient = (props: UserProps) => {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <UserInfo {...props} />
+          <OrganizationInfo {...props} />
           <ChevronsUpDownIcon className="ml-auto group-data-[state=collapsed]:hidden" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -47,22 +50,35 @@ export const SidebarUserButtonClient = (props: UserProps) => {
         className="min-w-64 max-w-80"
       >
         <DropdownMenuLabel className="font-normal p-1">
-          <UserInfo {...props} />
+          <OrganizationInfo {...props} />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
-            openUserProfile();
+            openOrganizationProfile();
             setOpenMobile(false);
           }}
         >
-          <UserIcon className="mr-1" />
-          Profile
+          <Building2Icon className="mr-1" />
+          Manage Organization
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/user-settings/notifications">
-            <SettingsIcon className="mr-1" />
-            Settings
+          <Link href="/employer/user-settings">
+            <UserRoundCogIcon className="mr-1" />
+            User Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/employer/pricing">
+            <CreditCardIcon className="mr-1" />
+            Change Plan
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/organizations/select">
+            <ArrowLeftRightIcon className="mr-1" />
+            Switch Organizations
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -76,8 +92,8 @@ export const SidebarUserButtonClient = (props: UserProps) => {
   );
 };
 
-const UserInfo = ({ user }: UserProps) => {
-  const nameInitials = user.name
+const OrganizationInfo = ({ user, organization }: UserProps) => {
+  const nameInitials = organization.name
     .split(" ")
     .slice(0, 2)
     .map((str) => str[0])
@@ -86,13 +102,18 @@ const UserInfo = ({ user }: UserProps) => {
   return (
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
-        <AvatarImage src={user.imageUrl} alt={user.name} />
+        <AvatarImage
+          src={organization.imageUrl ?? undefined}
+          alt={organization.name}
+        />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
-        <span className="truncate text-sm font-semibold">{user.name}</span>
+        <span className="truncate text-sm font-semibold">
+          {organization.name}
+        </span>
         <span className="truncate text-xs">{user.email}</span>
       </div>
     </div>
