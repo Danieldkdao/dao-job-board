@@ -12,11 +12,12 @@ import { getJobListingIdTag } from "../db/cache/job-listings";
 import { db } from "@/db/db";
 import { and, eq } from "drizzle-orm";
 import { JobListingTable } from "@/db/schema";
+import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permissions";
 
 export const createJobListing = async (unsafeData: JobListingSchemaType) => {
   const { orgId } = await getCurrentOrganization();
 
-  if (!orgId) {
+  if (!orgId || !(await hasOrgUserPermission("org:job_listings:create"))) {
     return {
       error: true,
       message: "You don't have permission to create a job listing.",
@@ -46,7 +47,7 @@ export const updateJobListing = async (
 ) => {
   const { orgId } = await getCurrentOrganization();
 
-  if (!orgId) {
+  if (!orgId || !(await hasOrgUserPermission("org:job_listings:update"))) {
     return {
       error: true,
       message: "You don't have permission to update this job listing.",

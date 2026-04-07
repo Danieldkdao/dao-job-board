@@ -1,3 +1,4 @@
+import { AsyncIf } from "@/components/async-if";
 import { MarkdownPartial } from "@/components/markdown/markdown-partial";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { JobListingBadges } from "@/features/job-listings/components/job-listing
 import { getJobListingIdTag } from "@/features/job-listings/db/cache/job-listings";
 import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
 import { getCurrentOrganization } from "@/services/clerk/lib/get-current-auth";
+import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permissions";
 import { and, eq } from "drizzle-orm";
 import { EditIcon } from "lucide-react";
 import { cacheTag } from "next/cache";
@@ -48,12 +50,16 @@ const JobListingIdSuspense = async ({ params }: JobListingProps) => {
           </div>
         </div>
         <div className="flex items-center gap-2 empty:-mt-4">
-          <Button asChild variant="outline">
-            <Link href={`/employer/job-listings/${jobListing.id}/edit`}>
-              <EditIcon className="size-4" />
-              Edit
-            </Link>
-          </Button>
+          <AsyncIf
+            condition={() => hasOrgUserPermission("org:job_listings:update")}
+          >
+            <Button asChild variant="outline">
+              <Link href={`/employer/job-listings/${jobListing.id}/edit`}>
+                <EditIcon className="size-4" />
+                Edit
+              </Link>
+            </Button>
+          </AsyncIf>
         </div>
       </div>
       <MarkdownPartial
