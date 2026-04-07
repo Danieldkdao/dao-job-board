@@ -3,15 +3,22 @@ import { MarkdownPartial } from "@/components/markdown/markdown-partial";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { db } from "@/db/db";
-import { JobListingTable } from "@/db/schema";
+import { JobListingStatus, JobListingTable } from "@/db/schema";
 import { JobListingBadges } from "@/features/job-listings/components/job-listing-badges";
 import { getJobListingIdTag } from "@/features/job-listings/db/cache/job-listings";
 import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
+import { hasReachedMaxFeaturedJobListings } from "@/features/job-listings/lib/plan-feature-helpers";
+import { getNextJobListingStatus } from "@/features/job-listings/lib/utils";
 import { getCurrentOrganization } from "@/services/clerk/lib/get-current-auth";
 import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permissions";
 import { and, eq } from "drizzle-orm";
-import { EditIcon } from "lucide-react";
+import { EditIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 import { cacheTag } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -60,6 +67,7 @@ const JobListingIdSuspense = async ({ params }: JobListingProps) => {
               </Link>
             </Button>
           </AsyncIf>
+          <StatusUpdateButton status={jobListing.status} />
         </div>
       </div>
       <MarkdownPartial
@@ -82,6 +90,66 @@ const JobListingIdSuspense = async ({ params }: JobListingProps) => {
 };
 
 export default JobListingIdPage;
+
+const StatusUpdateButton = ({ status }: { status: JobListingStatus }) => {
+  const button = <Button variant="outline">Toggle</Button>;
+
+  return (
+    <AsyncIf
+      condition={() => hasOrgUserPermission("org:job_listings:change_status")}
+    >
+      {getNextJobListingStatus(status) === "published" ? (
+        <AsyncIf
+          condition={async () => {
+            const isMaxed = await hasReachedMaxFeaturedJobListings();
+            return !isMaxed;
+          }}
+          otherwise={
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  {statusToggleButtonText(status)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="space-y-2">
+                You must upgrade your plan to publish more job listings.
+                <Button asChild>
+                  <Link href="/employer/pricing">Upgrade Plan</Link>
+                </Button>
+              </PopoverContent>
+            </Popover>
+          }
+        >
+          {button}
+        </AsyncIf>
+      ) : (
+        button
+      )}
+    </AsyncIf>
+  );
+};
+
+const statusToggleButtonText = (status: JobListingStatus) => {
+  switch (status) {
+    case "delisted":
+    case "draft":
+      return (
+        <>
+          <EyeIcon className="size-4" />
+          Publish
+        </>
+      );
+    case "published":
+      return (
+        <>
+          <EyeOffIcon className="size-4" />
+          Delist
+        </>
+      );
+    default:
+      throw new Error(`Unknown status: ${status satisfies never}`);
+  }
+};
 
 const getJobListing = async ({
   jobListingId,
