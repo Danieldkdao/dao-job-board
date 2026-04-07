@@ -12,8 +12,8 @@ export const insertJobListing = async (
     .returning();
 
   revalidateJobListingCache({
-    orgId: insertedJobListing.id,
-    id: insertedJobListing.organizationId,
+    orgId: insertedJobListing.organizationId,
+    id: insertedJobListing.id,
   });
 
   return insertedJobListing;
