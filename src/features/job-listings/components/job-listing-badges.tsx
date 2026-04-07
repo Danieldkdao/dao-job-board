@@ -67,13 +67,12 @@ export const JobListingBadges = ({
           {formatWage(wage, wageInterval)}
         </Badge>
       )}
-      {stateAbbreviation ||
-        (city && (
-          <Badge {...badgeProps}>
-            <MapPinIcon className="size-10" />
-            {formatJobListingLocation({ stateAbbreviation, city })}
-          </Badge>
-        ))}
+      {(stateAbbreviation || city) && (
+        <Badge {...badgeProps}>
+          <MapPinIcon className="size-10" />
+          {formatJobListingLocation({ stateAbbreviation, city })}
+        </Badge>
+      )}
       <Badge {...badgeProps}>
         <BuildingIcon />
         {formatLocationRequirement(locationRequirement)}
