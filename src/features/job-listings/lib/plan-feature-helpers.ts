@@ -6,7 +6,7 @@ import { and, count, eq } from "drizzle-orm";
 import { JobListingTable } from "@/db/schema";
 import { hasPlanFeature } from "@/services/clerk/lib/plan-features";
 
-export const hasReachedMaxFeaturedJobListings = async () => {
+export const hasReachedMaxPublishedJobListings = async () => {
   const { orgId } = await getCurrentOrganization();
   if (!orgId) return true;
 
@@ -21,6 +21,20 @@ export const hasReachedMaxFeaturedJobListings = async () => {
   return !canPost.some(Boolean);
 };
 
+export const hasReachedMaxFeaturedJobListings = async () => {
+  const { orgId } = await getCurrentOrganization();
+  if (!orgId) return true;
+
+  const count = await getFeaturedJobListingsCount(orgId);
+
+  const canFeature = await Promise.all([
+    hasPlanFeature("1_featured_job_listing").then((has) => has && count < 1),
+    hasPlanFeature("unlimited_featured_job_listings"),
+  ]);
+
+  return !canFeature.some(Boolean);
+};
+
 const getPublishedJobListingsCount = async (orgId: string) => {
   "use cache";
   cacheTag(getJobListingOrganizationTag(orgId));
@@ -31,6 +45,23 @@ const getPublishedJobListingsCount = async (orgId: string) => {
     .where(
       and(
         eq(JobListingTable.status, "published"),
+        eq(JobListingTable.organizationId, orgId),
+      ),
+    );
+
+  return res?.count ?? 0;
+};
+
+const getFeaturedJobListingsCount = async (orgId: string) => {
+  "use cache";
+  cacheTag(getJobListingOrganizationTag(orgId));
+
+  const [res] = await db
+    .select({ count: count() })
+    .from(JobListingTable)
+    .where(
+      and(
+        eq(JobListingTable.isFeatured, true),
         eq(JobListingTable.organizationId, orgId),
       ),
     );

@@ -40,7 +40,11 @@ export const SidebarNavMenuGroup = ({
             </SidebarMenuItem>
           );
           if (item.authStatus) {
-            return <SignInStatus when={item.authStatus}>{html}</SignInStatus>;
+            return (
+              <SignInStatus key={item.href} when={item.authStatus}>
+                {html}
+              </SignInStatus>
+            );
           }
           return html;
         })}

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import {
   insertJobListing,
   updateJobListing as updateJobListingDb,
+  deleteJobListing as deleteJobListingDb,
 } from "../db/job-listings";
 import { cacheTag } from "next/cache";
 import { getJobListingIdTag } from "../db/cache/job-listings";
@@ -13,6 +14,11 @@ import { db } from "@/db/db";
 import { and, eq } from "drizzle-orm";
 import { JobListingTable } from "@/db/schema";
 import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permissions";
+import { getNextJobListingStatus } from "../lib/utils";
+import {
+  hasReachedMaxFeaturedJobListings,
+  hasReachedMaxPublishedJobListings,
+} from "../lib/plan-feature-helpers";
 
 export const createJobListing = async (unsafeData: JobListingSchemaType) => {
   const { orgId } = await getCurrentOrganization();
@@ -73,6 +79,115 @@ export const updateJobListing = async (
   const updatedJobListing = await updateJobListingDb(jobListing.id, data);
 
   redirect(`/employer/job-listings/${updatedJobListing.id}`);
+};
+
+export const deleteJobListing = async (id: string) => {
+  const { orgId } = await getCurrentOrganization();
+
+  if (!orgId || !(await hasOrgUserPermission("org:job_listings:delete"))) {
+    return {
+      error: true,
+      message: "You don't have permission to delete this job listing.",
+    };
+  }
+
+  const jobListing = await getJobListing(id, orgId);
+  if (!jobListing) {
+    return {
+      error: true,
+      message: "Job not found",
+    };
+  }
+
+  await deleteJobListingDb(id);
+
+  redirect("/employer");
+};
+
+export const toggleJobListingStatus = async (id: string) => {
+  const { orgId } = await getCurrentOrganization();
+  if (
+    !orgId ||
+    !(await hasOrgUserPermission("org:job_listings:change_status"))
+  ) {
+    return {
+      error: true,
+      message:
+        "You don't have permission to change the status of this job listing.",
+    };
+  }
+
+  const jobListing = await getJobListing(id, orgId);
+  if (!jobListing) {
+    return {
+      error: true,
+      message: "Job listing not found.",
+    };
+  }
+
+  const newStatus = getNextJobListingStatus(jobListing.status);
+  if (
+    newStatus === "published" &&
+    (await hasReachedMaxPublishedJobListings())
+  ) {
+    return {
+      error: true,
+      message: "Please upgrade your plan to publish more job listings.",
+    };
+  }
+
+  await updateJobListingDb(id, {
+    status: newStatus,
+    isFeatured: newStatus === "published" ? undefined : false,
+    postedAt:
+      newStatus === "published" && !jobListing.postedAt
+        ? new Date()
+        : undefined,
+  });
+
+  return {
+    error: false,
+    message: "Job listing status toggled successfully!",
+  };
+};
+
+export const toggleJobListingFeatured = async (id: string) => {
+  const { orgId } = await getCurrentOrganization();
+  if (
+    !orgId ||
+    !(await hasOrgUserPermission("org:job_listings:change_status"))
+  ) {
+    return {
+      error: true,
+      message:
+        "You don't have permission to change the featured status of this job listing.",
+    };
+  }
+
+  const jobListing = await getJobListing(id, orgId);
+  if (!jobListing) {
+    return {
+      error: true,
+      message: "Job listing not found.",
+    };
+  }
+
+  const newFeaturedStatus = !jobListing.isFeatured;
+  if (newFeaturedStatus && (await hasReachedMaxFeaturedJobListings())) {
+    return {
+      error: true,
+      message: "Please upgrade your plan to feature more job listings.",
+    };
+  }
+
+  await updateJobListingDb(id, {
+    isFeatured: newFeaturedStatus,
+  });
+
+  return {
+    error: false,
+    message: "Job listing featured status toggled successfully!",
+  };
 };
 
 const getJobListing = async (id: string, orgId: string) => {
