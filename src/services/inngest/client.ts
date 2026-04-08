@@ -15,6 +15,9 @@ type Events = {
   "clerk/organization.created": ClerkWebhookData<OrganizationJSON>;
   "clerk/organization.updated": ClerkWebhookData<OrganizationJSON>;
   "clerk/organization.deleted": ClerkWebhookData<DeletedObjectJSON>;
+  "app/job-listing-application.created": {
+    data: { jobListingId: string; userId: string };
+  };
 };
 
 export const getWebhookSchema = <T extends keyof Events>(
