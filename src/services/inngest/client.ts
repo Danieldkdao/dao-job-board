@@ -18,6 +18,9 @@ type Events = {
   "app/job-listing-application.created": {
     data: { jobListingId: string; userId: string };
   };
+  "app/resume.uploaded": {
+    data: { user: { id: string } };
+  };
 };
 
 export const getWebhookSchema = <T extends keyof Events>(
