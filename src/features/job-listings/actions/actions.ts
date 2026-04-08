@@ -221,8 +221,14 @@ export const getAiJobListingSearchResults = async (
     };
   }
 
+  const publishedJobListings = await getPublishedJobListingsForAiSearch();
+
   const jobSearchResults = await getMatchingJobListings({
     prompt: data.query,
+    jobListings: publishedJobListings.map((jobListing) => ({
+      ...jobListing,
+      organizationName: jobListing.organization.name,
+    })),
     maxNumberOfJobs: 10,
   });
 
@@ -234,6 +240,32 @@ export const getAiJobListingSearchResults = async (
   }
 
   return { error: false, jobIds: jobSearchResults };
+};
+
+const getPublishedJobListingsForAiSearch = async () => {
+  return db.query.JobListingTable.findMany({
+    where: eq(JobListingTable.status, "published"),
+    columns: {
+      id: true,
+      title: true,
+      description: true,
+      wage: true,
+      wageInterval: true,
+      stateAbbreviation: true,
+      city: true,
+      locationRequirement: true,
+      experienceLevel: true,
+      type: true,
+      postedAt: true,
+    },
+    with: {
+      organization: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
 };
 
 const getJobListing = async (id: string, orgId: string) => {

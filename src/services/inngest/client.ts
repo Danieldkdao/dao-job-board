@@ -1,3 +1,4 @@
+import { JobListingTable } from "@/db/schema";
 import { UserJSON, DeletedObjectJSON } from "@clerk/nextjs/server";
 import { OrganizationJSON } from "@clerk/nextjs/types";
 import { eventType, Inngest, staticSchema } from "inngest";
@@ -20,6 +21,19 @@ type Events = {
     userId: string;
   };
   "app/resume.uploaded": { user: { id: string } };
+  "app/email.daily-user-job-listings": {
+    user: {
+      name: string;
+      email: string;
+    };
+    data: {
+      aiPrompt?: string;
+      jobListings: (Omit<
+        typeof JobListingTable.$inferSelect,
+        "createdAt" | "postedAt" | "updatedAt" | "status" | "organizationId"
+      > & { organizationName: string })[];
+    };
+  };
 };
 
 export const getEventSchema = <T extends keyof Events>(event: keyof Events) => {

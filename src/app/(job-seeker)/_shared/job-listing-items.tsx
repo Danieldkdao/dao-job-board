@@ -63,7 +63,7 @@ const JobListingItemsSuspense = async ({
   const { success, data } = searchParamsSchema.safeParse(await searchParams);
   const search = success ? data : {};
 
-  const jobListings = await getJobListings(await searchParams, jobListingId);
+  const jobListings = await getJobListings(search, jobListingId);
   if (jobListings.length === 0) {
     return (
       <div className="text-muted-foreground p-4">No job listings found</div>
@@ -216,7 +216,7 @@ const getJobListings = async (
     whereConditions.push(eq(JobListingTable.type, searchParams.type));
   }
   if (searchParams.jobIds) {
-    whereConditions.push(inArray(JobListingTable, searchParams.jobIds));
+    whereConditions.push(inArray(JobListingTable.id, searchParams.jobIds));
   }
 
   const data = await db.query.JobListingTable.findMany({
