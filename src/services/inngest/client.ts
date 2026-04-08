@@ -16,16 +16,13 @@ type Events = {
   "clerk/organization.updated": ClerkWebhookData<OrganizationJSON>;
   "clerk/organization.deleted": ClerkWebhookData<DeletedObjectJSON>;
   "app/job-listing-application.created": {
-    data: { jobListingId: string; userId: string };
+    jobListingId: string;
+    userId: string;
   };
-  "app/resume.uploaded": {
-    data: { user: { id: string } };
-  };
+  "app/resume.uploaded": { user: { id: string } };
 };
 
-export const getWebhookSchema = <T extends keyof Events>(
-  event: keyof Events,
-) => {
+export const getEventSchema = <T extends keyof Events>(event: keyof Events) => {
   return eventType(event, {
     schema: staticSchema<Events[T]>(),
   });

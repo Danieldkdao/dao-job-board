@@ -20,9 +20,7 @@ import {
 } from "@mdxeditor/editor";
 import { useTheme } from "next-themes";
 import { Ref } from "react";
-
-export const markdownClassNames =
-  "max-w-none prose prose-neutral dark:prose-invert font-sans";
+import { markdownClassNames } from "./markdown-renderer";
 
 const InternalMarkdownEditor = ({
   ref,

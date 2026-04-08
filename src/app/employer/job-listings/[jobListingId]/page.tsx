@@ -106,18 +106,8 @@ const JobListingIdSuspense = async ({ params }: JobListingProps) => {
         </div>
       </div>
       <MarkdownPartial
-        dialogMarkdown={
-          <MarkdownRenderer
-            className="prose-sm"
-            source={jobListing.description}
-          />
-        }
-        mainMarkdown={
-          <MarkdownRenderer
-            className="prose-sm"
-            source={jobListing.description}
-          />
-        }
+        dialogMarkdown={<MarkdownRenderer source={jobListing.description} />}
+        mainMarkdown={<MarkdownRenderer source={jobListing.description} />}
         dialogTitle="Description"
       />
     </div>

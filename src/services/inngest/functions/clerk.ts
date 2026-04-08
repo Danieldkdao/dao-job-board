@@ -1,5 +1,5 @@
 import { envServer } from "@/data/env/server";
-import { getWebhookSchema, inngest } from "../client";
+import { getEventSchema, inngest } from "../client";
 import { Webhook } from "svix";
 import { NonRetriableError } from "inngest";
 import { deleteUser, insertUser, updateUser } from "@/features/users/db/users";
@@ -24,7 +24,7 @@ export const clerkCreateUser = inngest.createFunction(
   {
     id: "clerk/create-db-user",
     name: "Clerk - Create DB User",
-    triggers: [getWebhookSchema<"clerk/user.created">("clerk/user.created")],
+    triggers: [getEventSchema<"clerk/user.created">("clerk/user.created")],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -67,7 +67,7 @@ export const clerkUpdateUser = inngest.createFunction(
   {
     id: "clerk/update-db-user",
     name: "Clerk - Update DB User",
-    triggers: [getWebhookSchema<"clerk/user.updated">("clerk/user.updated")],
+    triggers: [getEventSchema<"clerk/user.updated">("clerk/user.updated")],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -102,7 +102,7 @@ export const clerkDeleteUser = inngest.createFunction(
   {
     id: "clerk/delete-db-user",
     name: "Clerk - Delete DB User",
-    triggers: [getWebhookSchema<"clerk/user.deleted">("clerk/user.deleted")],
+    triggers: [getEventSchema<"clerk/user.deleted">("clerk/user.deleted")],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -130,7 +130,7 @@ export const clerkCreateOrganization = inngest.createFunction(
     id: "clerk/create-db-organization",
     name: "Clerk - Create DB Organization",
     triggers: [
-      getWebhookSchema<"clerk/organization.created">(
+      getEventSchema<"clerk/organization.created">(
         "clerk/organization.created",
       ),
     ],
@@ -163,7 +163,7 @@ export const clerkUpdateOrganization = inngest.createFunction(
     id: "clerk/update-db-organization",
     name: "Clerk - Update DB Organization",
     triggers: [
-      getWebhookSchema<"clerk/organization.updated">(
+      getEventSchema<"clerk/organization.updated">(
         "clerk/organization.updated",
       ),
     ],
@@ -194,7 +194,7 @@ export const clerkDeleteOrganization = inngest.createFunction(
     id: "clerk/delete-db-organization",
     name: "Clerk - Delete DB Organization",
     triggers: [
-      getWebhookSchema<"clerk/organization.deleted">(
+      getEventSchema<"clerk/organization.deleted">(
         "clerk/organization.deleted",
       ),
     ],

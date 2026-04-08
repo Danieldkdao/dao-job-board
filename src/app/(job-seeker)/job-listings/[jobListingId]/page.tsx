@@ -156,7 +156,7 @@ const JobListingDetails = async ({
         </Suspense>
       </div>
 
-      <MarkdownRenderer source={jobListing.description} className="prose-sm" />
+      <MarkdownRenderer source={jobListing.description} />
     </div>
   );
 };
