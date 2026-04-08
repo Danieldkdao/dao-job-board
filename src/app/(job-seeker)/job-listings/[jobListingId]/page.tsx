@@ -221,7 +221,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
         <DialogHeader>
           <DialogTitle>Application</DialogTitle>
           <DialogDescription>
-            Apply for a job cannot be undone and is something you can only do
+            Applying for a job cannot be undone and is something you can only do
             once per job listing.
           </DialogDescription>
         </DialogHeader>

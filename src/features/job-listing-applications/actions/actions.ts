@@ -50,7 +50,6 @@ export const createJobListingApplication = async (
     ...data,
   });
 
-  // todo: ai generated rating
   await inngest.send({
     name: "app/job-listing-application.created",
     data: { jobListingId, userId },
