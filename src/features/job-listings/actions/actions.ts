@@ -1,7 +1,15 @@
 "use server";
 
-import { getCurrentOrganization } from "@/services/clerk/lib/get-current-auth";
-import { jobListingSchema, JobListingSchemaType } from "./schemas";
+import {
+  getCurrentOrganization,
+  getCurrentUser,
+} from "@/services/clerk/lib/get-current-auth";
+import {
+  jobListingAiSearchSchema,
+  JobListingAiSearchSchemaType,
+  jobListingSchema,
+  JobListingSchemaType,
+} from "./schemas";
 import { redirect } from "next/navigation";
 import {
   insertJobListing,
@@ -19,6 +27,7 @@ import {
   hasReachedMaxFeaturedJobListings,
   hasReachedMaxPublishedJobListings,
 } from "../lib/plan-feature-helpers";
+import { getMatchingJobListings } from "@/services/inngest/ai/get-matching-job-listings";
 
 export const createJobListing = async (unsafeData: JobListingSchemaType) => {
   const { orgId } = await getCurrentOrganization();
@@ -188,6 +197,43 @@ export const toggleJobListingFeatured = async (id: string) => {
     error: false,
     message: "Job listing featured status toggled successfully!",
   };
+};
+
+export const getAiJobListingSearchResults = async (
+  unsafeData: JobListingAiSearchSchemaType,
+): Promise<
+  { error: true; message: string } | Promise<{ error: false; jobIds: string[] }>
+> => {
+  const { success, data } = jobListingAiSearchSchema.safeParse(unsafeData);
+  if (!success) {
+    return {
+      error: true,
+      message: "There was an error processing your search query.",
+    };
+  }
+
+  const { userId } = await getCurrentUser();
+
+  if (!userId) {
+    return {
+      error: true,
+      message: "You need an account to use AI job search.",
+    };
+  }
+
+  const jobSearchResults = await getMatchingJobListings({
+    prompt: data.query,
+    maxNumberOfJobs: 10,
+  });
+
+  if (jobSearchResults.length === 0) {
+    return {
+      error: true,
+      message: "No jobs found that match your search criteria.",
+    };
+  }
+
+  return { error: false, jobIds: jobSearchResults };
 };
 
 const getJobListing = async (id: string, orgId: string) => {

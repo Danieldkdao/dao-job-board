@@ -49,3 +49,11 @@ export const jobListingSchema = z
   );
 
 export type JobListingSchemaType = z.infer<typeof jobListingSchema>;
+
+export const jobListingAiSearchSchema = z.object({
+  query: z.string().trim().min(1, { error: "Please enter a search query." }),
+});
+
+export type JobListingAiSearchSchemaType = z.infer<
+  typeof jobListingAiSearchSchema
+>;
