@@ -9,6 +9,10 @@ import {
   insertOrganization,
   updateOrganization,
 } from "@/features/organizations/db/organizations";
+import {
+  deleteOrganizationUserSettings,
+  insertOrganizationUserSettings,
+} from "@/features/organizations/db/organization-user-settings";
 
 const verifyWebhook = ({
   raw,
@@ -214,6 +218,62 @@ export const clerkDeleteOrganization = inngest.createFunction(
       if (!orgId) throw new NonRetriableError("No organization ID.");
 
       await deleteOrganization(orgId);
+    });
+  },
+);
+
+export const clerkCreateOrgMembership = inngest.createFunction(
+  {
+    id: "clerk/create-organization-user-settings",
+    name: "Clerk - Create Organization User Settings",
+    triggers: [
+      getEventSchema<"clerk/organizationMembership.created">(
+        "clerk/organizationMembership.created",
+      ),
+    ],
+  },
+  async ({ event, step }) => {
+    await step.run("verify-webhook", async () => {
+      try {
+        verifyWebhook(event.data);
+      } catch {
+        throw new NonRetriableError("Invalid webhook");
+      }
+    });
+
+    await step.run("create-organization-user-settings", async () => {
+      const userId = event.data.data.public_user_data.user_id;
+      const orgId = event.data.data.organization.id;
+
+      await insertOrganizationUserSettings({ userId, organizationId: orgId });
+    });
+  },
+);
+
+export const clerkDeleteOrgMembership = inngest.createFunction(
+  {
+    id: "clerk/delete-organization-user-settings",
+    name: "Clerk - Delete Organization User Settings",
+    triggers: [
+      getEventSchema<"clerk/organizationMembership.deleted">(
+        "clerk/organizationMembership.deleted",
+      ),
+    ],
+  },
+  async ({ event, step }) => {
+    await step.run("verify-webhook", async () => {
+      try {
+        verifyWebhook(event.data);
+      } catch {
+        throw new NonRetriableError("Invalid webhook");
+      }
+    });
+
+    await step.run("delete-organization-user-settings", async () => {
+      const userId = event.data.data.public_user_data.user_id;
+      const orgId = event.data.data.organization.id;
+
+      await deleteOrganizationUserSettings({ userId, organizationId: orgId });
     });
   },
 );

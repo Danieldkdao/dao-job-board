@@ -1,6 +1,10 @@
 import { JobListingTable } from "@/db/schema";
-import { UserJSON, DeletedObjectJSON } from "@clerk/nextjs/server";
-import { OrganizationJSON } from "@clerk/nextjs/types";
+import {
+  UserJSON,
+  DeletedObjectJSON,
+  OrganizationJSON,
+  OrganizationMembershipJSON,
+} from "@clerk/nextjs/server";
 import { eventType, Inngest, staticSchema } from "inngest";
 
 type ClerkWebhookData<T> = {
@@ -16,6 +20,8 @@ type Events = {
   "clerk/organization.created": ClerkWebhookData<OrganizationJSON>;
   "clerk/organization.updated": ClerkWebhookData<OrganizationJSON>;
   "clerk/organization.deleted": ClerkWebhookData<DeletedObjectJSON>;
+  "clerk/organizationMembership.created": ClerkWebhookData<OrganizationMembershipJSON>;
+  "clerk/organizationMembership.deleted": ClerkWebhookData<OrganizationMembershipJSON>;
   "app/job-listing-application.created": {
     jobListingId: string;
     userId: string;
