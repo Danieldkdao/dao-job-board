@@ -11,6 +11,7 @@ import {
   SidebarTrigger,
 } from "../ui/sidebar";
 import { AppSidebarClient } from "./_app-sidebar-client";
+import { ThemeToggle } from "../theme-toggle";
 
 type AppSidebarProps = {
   content: ReactNode;
@@ -27,9 +28,12 @@ export const AppSidebar = ({
     <SidebarProvider className="overflow-y-hidden">
       <AppSidebarClient>
         <Sidebar collapsible="icon" className="overflow-hidden">
-          <SidebarHeader className="flex-row">
-            <SidebarTrigger />
-            <span className="text-xl text-nowrap">DAO Jobs</span>
+          <SidebarHeader className="flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <span className="text-xl text-nowrap">DAO Jobs</span>
+            </div>
+            <ThemeToggle />
           </SidebarHeader>
           <SidebarContent>{content}</SidebarContent>
           <SignInStatus>
