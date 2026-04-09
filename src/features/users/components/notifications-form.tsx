@@ -77,7 +77,7 @@ export const NotificationsForm = ({
             control={form.control}
             render={({ field, fieldState }) => (
               <Field>
-                <div className="space-y-0 5">
+                <div className="space-y-0.5">
                   <FieldLabel>Filter Prompt</FieldLabel>
                   <FieldDescription>
                     Our AI will use this prompt to filter job listings and only

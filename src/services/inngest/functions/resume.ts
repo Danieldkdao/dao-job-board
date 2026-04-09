@@ -34,7 +34,7 @@ export const createAISummaryOfUploadResume = inngest.createFunction(
     });
 
     const result = await step.ai.wrap("create-ai-summary", generateText, {
-      model: google("gemini-2.5-flash-lite-lite"),
+      model: google("gemini-2.5-flash-lite"),
       messages: [
         {
           role: "user",

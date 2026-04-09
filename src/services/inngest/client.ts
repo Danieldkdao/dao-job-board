@@ -1,4 +1,4 @@
-import { JobListingTable } from "@/db/schema";
+import { JobListingApplicationTable, JobListingTable } from "@/db/schema";
 import {
   UserJSON,
   DeletedObjectJSON,
@@ -38,6 +38,22 @@ type Events = {
         typeof JobListingTable.$inferSelect,
         "createdAt" | "postedAt" | "updatedAt" | "status" | "organizationId"
       > & { organizationName: string })[];
+    };
+  };
+  "app/email.daily-organization-user-applications": {
+    applications: (Pick<
+      typeof JobListingApplicationTable.$inferSelect,
+      "rating"
+    > & {
+      userName: string;
+      organizationId: string;
+      organizationName: string;
+      jobListingId: string;
+      jobListingTitle: string;
+    })[];
+    user: {
+      email: string;
+      name: string;
     };
   };
 };

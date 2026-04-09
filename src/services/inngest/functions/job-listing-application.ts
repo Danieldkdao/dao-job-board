@@ -66,7 +66,7 @@ export const rankApplicant = inngest.createFunction(
     if (!resumeSummary || !jobListing) return;
 
     await applicantRankingAgent.run(
-      JSON.stringify({ coverLetter, resumeSummary, jobListingId, userId }),
+      JSON.stringify({ coverLetter, resumeSummary, jobListing, userId }),
     );
   },
 );
